@@ -10,15 +10,14 @@ const start = async () => {
 
     const sheet = doc.sheetsByIndex[3]; // or use doc.sheetsById[id]
     console.log(sheet.title);
-    console.log(sheet.rowCount);
+    // console.log(sheet.rowCount);
 
-    // const rows = await sheet.getRows(); // can pass in { limit, offset }
-    // console.log(rows[1]); // 'Larry Page'
+    const rows = await sheet.getRows(); // can pass in { limit, offset }
+    // console.dir(rows[3]); // 'Larry Page'
 
-    await sheet.loadCells('E5:E129'); // loads a range of cells
-    // console.log(sheet.cellStats);
-    const e15 = await sheet.getCellByA1('E15'); // or A1 style notation
-    console.log(e15)
+    await sheet.loadCells('F5:E129'); // loads a range of cells
+    // const targetCell = await sheet.getCell(6, 11); // or A1 style notation
+    const c6 = sheet.getCellByA1('C6'); // or A1 style notation
 }
 
 start();
