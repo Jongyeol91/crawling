@@ -4,7 +4,7 @@ const stringify = require('csv-stringify/lib/sync');
 const fs = require('fs');
 
 const csv = fs.readFileSync('csv/movie.csv');
-const records = parse(csv.toString('UTF-8')); // 이차원 배열을
+const records = parse(csv.toString('utf-8'));
 
 const crawler = async () => {
     try {
@@ -16,11 +16,16 @@ const crawler = async () => {
             try {
                 const page = await browser.newPage();
                 await page.goto(r[1]);
-                const scoreEl = await page.$('.score.score_left .star_score');
-                if (scoreEl) {
-                    const text = await page.evaluate(tag => tag.textContent, scoreEl);
-                    // result.push([r[0], r[1], text.trim()]); // Promise.all로 돌아서 온것이기 때문에 순서가 보장이 안됨
-                    result[i] = [r[0], r[1], text.trim()]; // i는 promise.all이 시작하기 전에 생성되는 index이기 때문에 i를 result의 인덱스로 사용하면 원래순서대로 저장 가능
+
+                const text = await page.evaluate(() => {
+                    const score = document.querySelector('.score.score_left .star_score'); // document를 쓰려면 page.evaluate안에서 써야함
+                    if (score) {
+                        return score.textContent
+                    }
+                });
+                console.log(text);
+                if (text) {
+                    result[i] = [r[0], r[1], text.trim()];
                 }
                 await page.waitFor(1000);
                 await page.close();
@@ -29,7 +34,7 @@ const crawler = async () => {
             }
             await browser.close();
             const str = stringify(result); // 이중배배열을 sv로 만들어 줌
-            fs.writeFileSync('csv/result3.csv', str); // 파일에 받아온 텍스트(평점)를 씀
+            fs.writeFileSync('csv/result4.csv', str); // 파일에 받아온 텍스트(평점)를 씀
         }));
     } catch (err) {
         console.log(err);
@@ -55,3 +60,11 @@ crawler();
 //     page.goto('https://www.daum.net'),
 //     page2.goto('https://www.naver.com'),
 // ]);
+
+// @ 태그핸들러 가져오기
+// const scoreEl = await page.$('.score.score_left .star_score');
+// if (scoreEl) {
+//     const text = await page.evaluate(tag => tag.textContent, scoreEl);
+//     // result.push([r[0], r[1], text.trim()]); // Promise.all로 돌아서 온것이기 때문에 순서가 보장이 안됨
+//     result[i] = [r[0], r[1], text.trim()]; // i는 promise.all이 시작하기 전에 생성되는 index이기 때문에 i를 result의 인덱스로 사용하면 원래순서대로 저장 가능
+// }
