@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+
 const parse = require('csv-parse/lib/sync');
 const stringify = require('csv-stringify/lib/sync');
 const fs = require('fs');
@@ -12,30 +13,28 @@ const crawler = async () => {
         const browser = await puppeteer.launch({headless: process.env.NODE_ENV === 'production'}); // true: 화면이 없게 (default)
 
         // @ 페이지 객체 생성 (엑셀) + 이동
-        await Promise.all(records.map(async (r, i) => {
-            try {
-                const page = await browser.newPage();
-                await page.goto(r[1]);
+        //await Promise.all(records.map(async (r, i) => {
+        const page = await browser.newPage(); // 한탭에서 계속 사용하기 위해 for문 바깥으로 뺌
+        await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36");
+        for (const [i, r] of records.entries()) {
+            await page.goto(r[1]);
 
-                const text = await page.evaluate(() => {
-                    const score = document.querySelector('.score.score_left .star_score'); // document를 쓰려면 page.evaluate안에서 써야함
-                    if (score) {
-                        return score.textContent
-                    }
-                });
-                console.log(text);
-                if (text) {
-                    result[i] = [r[0], r[1], text.trim()];
+            const text = await page.evaluate(() => {
+                const score = document.querySelector('.score.score_left .star_score'); // document를 쓰려면 page.evaluate안에서 써야함
+                if (score) {
+                    return score.textContent
                 }
-                await page.waitFor(1000);
-                await page.close();
-            } catch (err) {
-                console.log(err);
+            });
+            console.log(text);
+            if (text) {
+                result[i] = [r[0], r[1], text.trim()];
             }
+            await page.waitFor(1000);
+        }
+            await page.close();
             await browser.close();
             const str = stringify(result); // 이중배배열을 sv로 만들어 줌
             fs.writeFileSync('csv/result4.csv', str); // 파일에 받아온 텍스트(평점)를 씀
-        }));
     } catch (err) {
         console.log(err);
     }
