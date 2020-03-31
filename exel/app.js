@@ -1,9 +1,8 @@
-const parse = require('csv-parse/lib/sync');
-const fs = require('fs');
+const xlsx = require ('xlsx');
 
-const csv = fs.readFileSync('csv/movie.csv');
-const records = parse(csv.toString('utf-8'));
+const workbook = xlsx.readFile('xlsx/data.xlsx');
 
-records.forEach((cv, i) => {
-    console.log(i, cv);
-});
+const ws = workbook.Sheets.영화목록
+// console.log(workbook);
+console.log(ws)
+

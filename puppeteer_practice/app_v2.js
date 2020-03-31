@@ -1,11 +1,22 @@
 const puppeteer = require('puppeteer');
-
-const parse = require('csv-parse/lib/sync');
-const stringify = require('csv-stringify/lib/sync');
 const fs = require('fs');
 
-const csv = fs.readFileSync('csv/movie.csv');
-const records = parse(csv.toString('utf-8'));
+// 엑셀 모듈
+const xlsx = require('xlsx');
+const workbook = xlsx.readFile('xlsx/data.xlsx');
+
+// csv모듈
+const parse = require('csv-parse/lib/sync');
+const stringify = require('csv-stringify/lib/sync');
+
+// 엑셀
+const add_to_sheet = require('./add_to_sheet');
+const ws = workbook.Sheets.영화목록;
+const records = xlsx.utils.sheet_to_json(ws);
+
+// csv
+const csv = fs.readFileSync('./csv/movie.csv');
+//const records = parse(csv.toString('utf-8'));
 
 const crawler = async () => {
     try {
